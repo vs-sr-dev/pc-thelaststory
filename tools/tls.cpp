@@ -22,7 +22,21 @@ void ring(const char* what, PPCContext& c) {
            ld8(c.r[13] - 0x67E8), ld16(c.r[13] - 0x67E4), gd ? ld32(gd + 0x78) : 0, gd ? ld32(gd + 0x7C) : 0);
 }
 
+// The equipment's textures (the bodies') are made at load time: the GP
+// composes them (atn::TextureComposite), GXCopyTex puts them in RAM as
+// RGBA8, and the CPU turns that copy's tiles into rows in place
+// (atnTex_Unswizzle), merges an alpha mask and compresses it to CMPR
+// (atnTex_CompressCopy). wiikit keeps EFB copies on the host GPU: the copy's
+// bytes are written into RAM before the game first reads them, or the
+// bodies come out black. (The mask is a texture from the disc: no copy.)
+PPCFunc o_unswizzle;
+void unswizzle(PPCContext& c) {                       // (data, format, w, h)
+    gx_copy_to_ram(c.r[3] & 0x3FFFFFFF);
+    o_unswizzle(c);
+}
+
 void install() {
+    o_unswizzle = ppc_hook("atnTex_Unswizzle", unswizzle);
     // The game plays with the Classic Controller (or the Remote and Nunchuk,
     // which wiikit has no Nunchuk for); it learns of controllers from KPAD's
     // connect callback, which wiikit calls for a game of the Classic.

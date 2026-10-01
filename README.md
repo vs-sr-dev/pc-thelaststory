@@ -22,8 +22,8 @@ not here. The game's formats were reverse engineered earlier, in
 After one session the game **boots and runs into its first chapter**: the
 strap screen, the title, the menu, New Game, Chapter 1 (Reptids' Cave),
 Zael in the cave and the first tutorial, at 16:9 and a steady 30 frames a
-second, with the Classic Controller (a gamepad). Nobody has played it
-through yet, and the sound has gaps while the game loads. See
+second, with the Classic Controller (a gamepad), played by hand through
+the first cave. The sound blinks at an autosave; fog is not drawn yet. See
 [docs/00-sessions.md](docs/00-sessions.md) and the plan in
 [docs/07-next-session.md](docs/07-next-session.md).
 

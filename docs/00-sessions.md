@@ -35,9 +35,17 @@ Results:
   and the first tutorial, at 30 frames a second throughout (10 060 frames
   in 340 seconds); up to 52 million GX draws, merged into 4.8 million GL
   draws.
+* **Played.** The user played into the cave and found two faults, both
+  fixed the same session. The bodies were black and see-through: the
+  equipment's textures are composed by the GP and compressed to CMPR by the
+  CPU from an EFB copy in RAM, which wiikit never wrote (now it does, where
+  the port asks: `03-executable.md`). And the game froze a little after the
+  player took control: a busy frame filled the FIFO behind the breakpoint,
+  and wiikit raised no overflow (now it does). Then: "it plays like a
+  dream", the sound clean but for a blink at an autosave.
 * **The sound** has gaps while the game loads (the AI interrupt not taken
-  for 20-30 ms while the main thread works), none on the title. Not yet
-  listened to in game.
+  for 20-30 ms while the main thread works), none on the title; in game
+  the user hears only that blink at an autosave.
 
 wiikit's changes of this session were checked on the six other ports
 (`10-wiikit.md`).

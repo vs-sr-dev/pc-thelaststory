@@ -18,8 +18,15 @@ renderer, AX, the Classic Controller on SDL gamepads.
 | `WPADGetInfo` hooked, `WPADGetInfoAsync` answered for a channel with a controller (full battery, its LED, the extension attached), its callback called at the next delivery | 5 | `WPADGetInfo` sleeps on the channel's control block, which a WPAD never started does not have |
 | `WPADSetAutoSleepTime`, `WPADResetAutoSleepTimeCount` hooked as nothing | 5 | the SDKs of 2010 on put an unused Remote to sleep; the reset writes the time into the channel's control block |
 
-Checked on the six other ports before it went in: Victorious self-test
-15/15 and to its Auditions episode; Dragon Quest Swords to its Adventure
-Logs; Conduit 2, Arc Rise Fantasia and Monster Hunter Tri to their titles;
-Mega Man X: Command Mission to its opening scenes: the same screens as
-before. Each was bumped to `ae77320` with a local commit.
+Then, the same session, after the user played it (`cf9adb9`; `3166862` names this port in wiikit's README):
+
+| Change | Layer | Why it is not game knowledge |
+|---|---|---|
+| **an EFB copy into RAM on request** (`gx_copy_to_ram`): the renderer reads its copy back at the copy's native size, in the queue's order, and the runtime encodes it in the copy's texture format (I4, I8, IA4, IA8, RGB565, RGB5A3, RGBA8 in GX's tiles); `hw_run_locked` takes any callable | 5 | a game that reads an EFB copy on the CPU (to compress it, to save it); the port says where, as copying every copy back would stall the GPU every frame |
+| **the CP's overflow and underflow**: the status register and the CP interrupt from what is held against the FIFO's watermarks (CP 0x28-0x2E) | 5 | with the GP held at a breakpoint, a frame larger than the FIFO filled it and the CPU wrote on round it; the SDK suspends the writer at the overflow and resumes it at the underflow |
+
+Each was checked on the six other ports before it went in: Victorious
+self-test 15/15 and to its Auditions episode; Dragon Quest Swords to its
+Adventure Logs; Conduit 2, Arc Rise Fantasia and Monster Hunter Tri to their
+titles; Mega Man X: Command Mission to its opening scenes: the same screens
+as before. Each port was bumped to it.

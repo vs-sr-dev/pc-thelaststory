@@ -78,3 +78,31 @@ picture on screen. It depends on the console's FIFO breakpoint stopping
 the GP, which wiikit did not model (`10-wiikit.md`).
 
 `TLS_GFXTRACE=1` logs the ring at each of these four calls.
+
+A frame of a busy scene is larger than the FIFO (512 KB here; a frame
+recorded in a dungeon by the reverse engineering project is 555 KB). While
+the GP waits at the breakpoint the CPU fills the FIFO, and on the console
+the CP's overflow interrupt suspends the writing thread until the GP has
+drained it. wiikit did not raise it: the CPU wrote on round the FIFO, a
+breakpoint's address came round again in what was held, the GP stopped at
+the wrong one, and the game froze once the player had control (`10-wiikit.md`).
+
+## The equipment's textures
+
+The characters' bodies wear textures made at load time (the reverse
+engineering project found them in RAM and nowhere on the disc): the
+dyed equipment.
+
+| Address | Name given | What it does |
+|---|---|---|
+| 800D7278 | | composes the texture with the GP (`atn::TextureComposite`), `GXCopyTex` to RAM as RGBA8, waits for a draw-done |
+| 800C0FBC | `atnTex_Unswizzle` | (data, format, w, h): GX tiles to rows, in place |
+| 800D6E48 | `atnTex_CompressCopy` | (src, dst, w, h): ARGB to RGBA into `"UnswizzledTemp"`, then CMPR through `"DxtTemp"` |
+
+The CPU reads an EFB copy. wiikit keeps EFB copies on the host GPU and
+leaves RAM alone, so the bodies came out black and see-through (the
+heads, plain textures from the disc, were right). The port's layer hooks
+`atnTex_Unswizzle` and has wiikit write the copy into RAM first
+(`gx_copy_to_ram`). Writing it any later, at the compression, puts tiles
+where the game has already laid rows: the bodies came out in green and
+black stripes.

@@ -1,13 +1,15 @@
 # TODO — session 2
 
-The game runs from the strap screen into Chapter 1 at 30 frames a second,
-with the Classic Controller (session 1). Nobody has played it yet.
+The game runs and plays from the strap screen into Chapter 1 at 30 frames
+a second, with the Classic Controller (session 1); the user played the
+cave.
 
-1. **Play it.** The cave, the first battles (the Gathering, the crossbow,
-   the commands), the first cutscenes and their voices, Lazulis. Note what
-   is wrong to the eye and the ear; F12 traces a frame's GX commands.
-2. **The sound's gaps.** `WIIKIT_AUDIODBG=1` during loads: the AI
-   interrupt raised, not acknowledged for 20-30 ms, the main thread in the
+1. **Play on.** The first battles (the Gathering, the crossbow, the
+   commands), the cutscenes and their voices, Lazulis, saving and loading.
+   Note what is wrong to the eye and the ear; F12 traces a frame's GX
+   commands.
+2. **The sound's gaps.** The user hears one only at an autosave, a blink.
+   `WIIKIT_AUDIODBG=1` during loads: the AI interrupt raised, not acknowledged for 20-30 ms, the main thread in the
    engine's loading code (8020xxxx-8021xxxx) with interrupts enabled. Find
    what keeps it from taking them (a host-side wait inside a guest call, a
    loop the recompiler does not poll in). Monster Hunter Tri's open gaps

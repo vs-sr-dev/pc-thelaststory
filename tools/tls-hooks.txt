@@ -4,3 +4,4 @@ atnGfx_SwapFrame
 atnGfx_BreakPtCallback
 atnGfx_PreRetrace
 atnGfx_PostRetrace
+atnTex_Unswizzle
