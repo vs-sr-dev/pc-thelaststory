@@ -1,0 +1,6 @@
+# The Last Story: the functions tools/tls.cpp replaces, on top of
+# wiikit/runtime/hooks.txt.
+atnGfx_SwapFrame
+atnGfx_BreakPtCallback
+atnGfx_PreRetrace
+atnGfx_PostRetrace

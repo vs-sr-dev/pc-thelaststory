@@ -1,0 +1,55 @@
+addr	name	evidence
+805EAA10	PPCHalt	sync; nop; li r3,0; nop; b back: the SDK's halt loop, the only one in the DOL
+805F2E90	RealMode	clrlwi r3,r3,2; mtsrr0 r3; mfmsr; IR/DR cleared; mtsrr1; rfi: the only such sequence
+805EDAE0	OSSaveContext	Dolphin's signature, 0x80 bytes; OSLoadContext follows it
+805EDB60	OSLoadContext	right after OSSaveContext, 0xD8 bytes, the same code as Victorious's (signature against its ELF)
+805F51B0	OSCreateThread	0x26C bytes, the same code as Victorious's (signature against its ELF)
+80686DD4	__write_console	0xD0 bytes, the same code as Victorious's (signature against its ELF); reached only through MSL's console file table
+805F03C0	OSFatal	0x1E8 bytes, the same code as Victorious's (signature against its ELF)
+805F3430	__OSReboot	0x6C bytes, the same code as Victorious's (signature against its ELF)
+805F3780	OSShutdownSystem	0x11C bytes, the same code as Victorious's (signature against its ELF), just before OSRestart
+805F38A0	OSRestart	0xD4 bytes, the same code as Victorious's (signature against its ELF)
+805F3C10	OSReturnToMenu	names itself ("OSReturnToMenu()"); 0x40 bytes as in Victorious
+80602ED0	__VIRetraceHandler	VI.o order as in Victorious (after VIWaitForRetrace's neighbours __VIInit, VIInit: nine neighbours agree); 0x80C bytes, the same as Victorious's
+8065F490	WPADInit	0x70 bytes, the same code as Victorious's (signature against its ELF); called by KPADInitEx
+8065F500	WPADStartFastSimpleSync	b WUDStartFastSyncSimple; the first of five 4-byte WUD thunks, in Victorious's order
+8065F510	WPADStopSimpleSync	b WUDStopSyncSimple (Dolphin's name for the target)
+8065F520	WPADSetSimpleSyncCallback	b WUDSetSyncSimpleCallback; third WUD thunk, in Victorious's order
+8065F530	WPADRegisterAllocator	b WUDRegisterAllocator; called by the game before KPADInit (800DDB98)
+8065F540	WPADGetStatus	b WUDGetStatus; called by KPADInitEx and KPADiRead
+8065F5A0	WPADGetSensorBarPosition	0x34 bytes, ten neighbours in Victorious's order agree; called by KPAD (80658638, 80658FA4)
+80660A80	WPADGetAccGravityUnit	0xD4 bytes, the same code as Victorious's (signature against its ELF); called by KPAD
+80660B90	WPADDisconnect	0xC0 bytes, the same code as Victorious's (signature against its ELF)
+80660D80	WPADSetSamplingCallback	after WPADProbe, before WPADSetConnectCallback (identical code, 0x88 each), as in Victorious and Monster Hunter Tri; called by KPADInitEx with KPAD's sampling callback
+80660E10	WPADSetConnectCallback	after WPADSetSamplingCallback (identical code, 0x88), as in Victorious; called by KPADInitEx and the Home Button menu
+80660EA0	WPADSetExtensionCallback	0x5C bytes, the same code as Victorious's (signature against its ELF)
+80660F00	WPADGetDataFormat	right after WPADSetExtensionCallback, before WPADSetDataFormat, as in Victorious and Monster Hunter Tri (0x44 bytes; Dolphin's database gives this getter's shape the name WPADIsDpdEnabled too)
+80660F50	WPADSetDataFormat	0xC0 bytes, the same code as Victorious's (signature against its ELF); called by KPAD
+806610E0	WPADGetInfoAsync	0x220 bytes, the same code as Victorious's (signature against its ELF)
+806616F0	WPADRead	0x98 bytes, the same code as Victorious's (signature against its ELF); called by KPAD's sampling
+80661790	WPADSetAutoSamplingBuf	0x15C bytes, the same code as Victorious's (signature against its ELF)
+80661B10	WPADIsSpeakerEnabled	0x44 bytes, sixteen neighbours in Victorious's order agree; called by the Home Button menu
+80661B60	WPADControlSpeaker	0x15FC bytes, the same code as Victorious's (signature against its ELF)
+80663160	WPADGetSpeakerVolume	0x34 bytes, seventeen neighbours in Victorious's order agree
+806631A0	WPADSetSpeakerVolume	0x50 bytes, seventeen neighbours in Victorious's order agree; Dolphin's database puts the name on 80660C50, which stores one byte to a global (not a channel's)
+806633C0	WPADSendStreamData	0x210 bytes, the same code as Victorious's (signature against its ELF)
+806635D0	WPADGetDpdSensitivity	0x34 bytes, seventeen neighbours in Victorious's order agree; called by KPADInitEx
+80663610	WPADIsDpdEnabled	0x44 bytes, seventeen neighbours in Victorious's order agree; called by KPAD
+806636A0	WPADControlDpd	0x1080 bytes, the same code as Victorious's (signature against its ELF)
+80666840	WPADIsUsedCallbackByKPAD	lwz r3,-0x5468(r13); blr: the getter of the flag WPADSetCallbackByKPAD sets
+80666850	WPADSetCallbackByKPAD	stw r3,-0x5468(r13); blr; called by KPADInitEx around its callback set-up (li r3,0 ... li r3,1)
+806540C0	KPADIsEnableAimingMode	returns the channel block's +0x649 (KPAD's 0x688-byte blocks at 80828318); eight neighbours in Victorious's order agree
+806540E0	KPADGetSensorHeight	returns the channel block's float +0x128; nine neighbours in Victorious's order agree
+806572D0	KPADRead	li r6,0; li r7,0; b KPADiRead; called by the game (800DDCE4, 800DDE14)
+80657AF0	KPADInit	li r3,0; li r4,0; b KPADInitEx; called by the game (800DDB9C)
+80657B00	KPADInitEx	KPADInit's body, 0x468 bytes as in Victorious; calls WPADInit, WPADSetCallbackByKPAD, WPADSetSamplingCallback
+80658170	KPADSetConnectCallback	0x58 bytes, the same code as Victorious's (signature against its ELF); called by the game (800DDBB0)
+80658220	KPADDisableDPD	stores 0 to the channel block's +0x642; eight neighbours in Victorious's order agree
+80658240	KPADEnableDPD	stores 1 to the channel block's +0x642; eight neighbours in Victorious's order agree
+80071AFC	atnGfx_SwapFrame	"atn_graphics_device.cpp" ("queue overflow"): queues the frame's FIFO write pointer, XFB and draw-sync token in a 5-entry ring (807C6F68), copies to the XFB, then sleeps until at most one frame is pending
+80072BDC	atnGfx_BreakPtCallback	registered with GXSetBreakPtCallback (80612B10) by 800713D4; pops the ring when the GP reaches the frame's FIFO end, unless that frame's XFB is the one on screen
+80072D74	atnGfx_PreRetrace	registered with VISetPreRetraceCallback (806036E0) by 800713D4; when the PE token is one past the last, flips the XFB on screen (VISetNextFrameBuffer, VIFlush)
+80072E08	atnGfx_PostRetrace	registered with VISetPostRetraceCallback (80603730) by 800713D4; pops the ring once both the breakpoint and the flip were seen
+80661010	WPADGetInfo	WPADGetInfoAsync with its own callback (8065D0E0: stores the result per channel, wakes the control block's queue at +0x928), then sleeps there and returns the result; right after WPADDisconnect's neighbours, before WPADGetInfoAsync
+80660C50	WPADSetAutoSleepTime	(minutes): stores its argument to a global (-0x544E(r13)) under OSDisableInterrupts; right after WPADDisconnect, before WPADResetAutoSleepTimeCount (both absent from Victorious's SDK)
+80660C90	WPADResetAutoSleepTimeCount	(chan): stores __OSGetSystemTime to the channel's control block (+0xAE8) under OSDisableInterrupts; just before WPADProbe; called by the game (800DF19C)

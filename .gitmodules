@@ -1,0 +1,3 @@
+[submodule "wiikit"]
+	path = wiikit
+	url = https://github.com/vs-sr-dev/wiikit.git
