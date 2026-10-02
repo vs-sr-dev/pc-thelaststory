@@ -1,0 +1,11 @@
+{
+  "$schema": "https://recomp.fyi/schema/v1.json",
+  "game": "The Last Story",
+  "system": "Wii",
+  "type": "recomp",
+  "toolchain": "wiikit",
+  "status": "in-progress",
+  "targets": [
+    "Windows"
+  ]
+}
