@@ -30,3 +30,23 @@ self-test 15/15 and to its Auditions episode; Dragon Quest Swords to its
 Adventure Logs; Conduit 2, Arc Rise Fantasia and Monster Hunter Tri to their
 titles; Mega Man X: Command Mission to its opening scenes: the same screens
 as before. Each port was bumped to it.
+
+## What it gave wiikit (session 2: `d9d14c0`)
+
+| Change | Layer | Why it is not game knowledge |
+|---|---|---|
+| **no AI block while the game is in its AI interrupt**: `__AIDHandler` hooked (where the executable names it); a late block waits for it to return, and starts no sooner than half a block after the game took the last one's interrupt; the 50 ms a block may wait for its frame count from when it began to wait | 5 | NW4R's AI callback enables interrupts once it has had AX mix; a block started there is taken inside it, the SDK's handler skips the callback while it runs, and the block has no frame: a gap of 50 ms, ten a second where frames came late |
+| **no wait for the renderer with interrupts off**: the record is kept and handed over at the next point where they are on (`ppc_poll`); a read-back still waits | 5 | a game that moves its FIFO breakpoint in a VI callback ends the held frame inside the handler; the wait there took no interrupt, the AI's included |
+| **out of Windows' power throttling** (`SetProcessInformation`: execution speed, timer resolution) | 5 | out of the foreground Windows 11 may slow the process and ignore its 1 ms timer: the waits that take interrupts every millisecond took them every 15.6 ms, and the sound grated |
+| `WIIKIT_AUDIODBG` reports every guest thread, the parked ones too (as `--watch` does) | 5 | where a block's frame was held up |
+
+Checked on the seven other ports, old binaries against new, the sound on:
+Victorious to its Auditions episode, Dragon Quest Swords to its Adventure
+Logs, Conduit 2, Arc Rise Fantasia and Crystal Bearers to their titles,
+Mega Man X: Command Mission to its opening scenes, Monster Hunter Tri
+through its opening movie: the same screens; blocks without their frame 29
+before, 4 after. Each port was bumped to it.
+
+The rest of session 2 is the port's own (`tools/tls.cpp`): the engine's
+frame wait to an empty ring, and the ring's queue woken at every retrace
+(`03-executable.md`).

@@ -28,7 +28,7 @@ else. `tools/names.py` puts them together, most trusted first:
 
 | Source | Names | What |
 |---|---|---|
-| `tools/names-manual.tsv` | 54 | 50 functions the runtime hooks that the others miss, each with its evidence; four of the engine's own (below) |
+| `tools/names-manual.tsv` | 62 | 50 functions the runtime hooks that the others miss, each with its evidence; twelve the port hooks or names, the engine's and the SDK's sound (below) |
 | `files/LastWorld.sel` | 11 | the executable's exports: the Home Button menu's six, libc |
 | the SDK's strings | 26 | a function that prints `Name()` names itself |
 | Dolphin's `totaldb.dsy` | 808 | by signature (`tools/sigmatch.py`) |
@@ -79,6 +79,25 @@ the GP, which wiikit did not model (`10-wiikit.md`).
 
 `TLS_GFXTRACE=1` logs the ring at each of these four calls.
 
+`atnGfx_SwapFrame` ends in a wait: interrupts off, then while more than one
+frame is queued, interrupts on and `OSSleepThread` on the ring's queue
+(807C6F60), which the breakpoint callback and the post-retrace wake when a
+frame leaves. The CPU goes on a frame ahead, the GP held at that frame's
+breakpoint until the picture before it has been on screen. Two things
+follow on wiikit, whose GP keeps up with the CPU:
+
+* the GP waits at the breakpoint through most of the next frame, and so
+  does anything the CPU asks of it then: a `GXDrawDone` mid-frame waited
+  for the flip (below, the equipment);
+* the wait enables interrupts before it sleeps. wiikit delivers what is
+  pending right there, and a frame that leaves the ring then wakes no one:
+  if nothing is left to leave, the game sleeps for good.
+
+The port waits on in `atnGfx_SwapFrame` until the ring is empty (asleep with
+interrupts off, as the SDK means `OSSleepThread`), and wakes the ring's
+queue at every post-retrace. The pace stays 30 frames a second; the CPU
+starts each frame with the GP free. `TLS_AHEAD=1` keeps the engine's rule.
+
 A frame of a busy scene is larger than the FIFO (512 KB here; a frame
 recorded in a dungeon by the reverse engineering project is 555 KB). While
 the GP waits at the breakpoint the CPU fills the FIFO, and on the console
@@ -106,3 +125,28 @@ heads, plain textures from the disc, were right). The port's layer hooks
 (`gx_copy_to_ram`). Writing it any later, at the compression, puts tiles
 where the game has already laid rows: the bodies came out in green and
 black stripes.
+
+The textures are made when a character comes in, each by
+`atnTex_Composite` (800D7278), with a `GXDrawDone` (806140C0). With the
+engine's frame wait, each draw-done waited for the flip: up to 33 ms a
+texture, 80-130 ms a character, sound included. With the port's, 5 ms on
+average.
+
+## The clock
+
+The effects advance by `atnEff_Advance` (8022D078): the frames handed to it,
+times a speed (the object at `-0x6718(r13)`, +0x3A4), in steps of 1.0 with
+the remainder carried; each step's length goes to `-0x7AE0(r13)`, which the
+emitters integrate by (the reverse engineering project's doc 20). Its
+caller hands it 1.0 at every frame: the engine counts frames, not time.
+
+## The sound
+
+NW4R's AI callback (805B6978, registered over AX's) calls AX's
+(`__AXOutAiCallback`, 806098D0: mix a frame if the DSP is done, else mark
+the deadline for `__AXDSPResumeCallback`, 80609990), then **enables
+interrupts** (`OSEnableInterrupts`, 805F1EA0) for the rest of its work.
+The SDK's `__AIDHandler` skips the callback while it runs. On the console
+the next AI interrupt is 3 ms away; on wiikit, which caught up a late block
+at once, it came inside that window, and the block had no frame (wiikit
+now waits for the handler, `10-wiikit.md`).

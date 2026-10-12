@@ -49,3 +49,45 @@ Results:
 
 wiikit's changes of this session were checked on the six other ports
 (`10-wiikit.md`).
+
+## Session 2 — the sound's gaps and the stalls
+
+Goal: the frame rate. A message from a player who had found the port came
+first, and with it the sound: the user heard it stutter. The session went
+there, and stayed.
+
+Results:
+
+* **The engine's clock** (for later): the effects advance by the frames
+  the engine hands them, 1.0 at every frame, never measured time
+  (`atnEff_Advance`, `03-executable.md`). The world steps by frames: 60
+  frames a second means half a step each, not a lifted cap.
+* **The gaps in the tutorial's window**, ten a second: NW4R's AI callback
+  enables interrupts once it has had AX mix; wiikit, catching up a late
+  block, started the next one right there, inside the callback, which the
+  SDK's AI handler then skipped: no frame for that block, and 50 ms of
+  waiting for it. wiikit no longer starts a block while the game is in
+  `__AIDHandler` (798 gaps in 190 s, then none).
+* **A stall inside an interrupt**: the engine moves its FIFO breakpoint in a
+  VI callback; the frame held behind it ended there, and wiikit waited for
+  the renderer with interrupts off. It now hands such a frame over at the
+  next point where interrupts are on.
+* **The window behind another**: the sound grated (the user found it).
+  Windows 11 throttles a process out of the foreground and may ignore its
+  1 ms timer; wiikit now opts out of both.
+* **A character coming in** stalled the game and its sound, 80-130 ms
+  (the user's guess, "a spawn, an event", was right): its equipment's
+  textures are composed by the GP mid-frame, each with a `GXDrawDone`,
+  and wiikit's GP, always caught up, waited at the queued frame's
+  breakpoint until the flip. The port now lets the CPU go on only once the
+  frame ring is empty (`tools/tls.cpp`): 14 frames over 60 ms in two minutes,
+  then 2; still 30 frames a second.
+* **A lost wake-up in the engine**: its frame wait enables interrupts
+  and then sleeps; a frame leaving the ring in between woke no one. Seen as
+  a freeze after the third frame under load. The port wakes the ring's
+  queue at every retrace.
+
+`TLS_HITCH=1` reports frames over 60 ms and where the threads were. wiikit's
+changes (`d9d14c0`) were checked on the seven other ports (`10-wiikit.md`).
+Then the user played: "decidedly improved", one dip left of all the small
+ones (scene changes still take a frame or two over 60 ms).

@@ -1,31 +1,29 @@
-# TODO — session 2
+# TODO — session 3
 
-The game runs and plays from the strap screen into Chapter 1 at 30 frames
-a second, with the Classic Controller (session 1); the user played the
-cave.
+The game plays from the strap screen into Chapter 1 at 30 frames a second
+with the Classic Controller; since session 2 the sound holds through the
+tutorial's window, behind other windows, and when characters come in
+(`00-sessions.md`).
 
-1. **Play on.** The first battles (the Gathering, the crossbow, the
+1. **The frame rate**, the goal of the port. The engine counts frames, not
+   time: `atnEff_Advance` gets 1.0 at every frame (`03-executable.md`).
+   Find where that 1.0 comes from (its caller 8023686C, up through
+   800D28FC, 800D2500: the frame's update) and what else reads it: the
+   characters, their `.motion` (30 frames a second, the reverse
+   engineering project's doc 10), the camera, the physics. Then 60: the
+   engine's VI callbacks act on every other retrace when `atnGfx`'s object
+   has `+0xCC` set; clear it, hand half a step, and see what breaks.
+   `TLS_HITCH=1` and `WIIKIT_PERF=1` measure.
+2. **Play on.** The first battles (the Gathering, the crossbow, the
    commands), the cutscenes and their voices, Lazulis, saving and loading.
-   Note what is wrong to the eye and the ear; F12 traces a frame's GX
-   commands.
-2. **The sound's gaps.** The user hears one only at an autosave, a blink.
-   `WIIKIT_AUDIODBG=1` during loads: the AI interrupt raised, not acknowledged for 20-30 ms, the main thread in the
-   engine's loading code (8020xxxx-8021xxxx) with interrupts enabled. Find
-   what keeps it from taking them (a host-side wait inside a guest call, a
-   loop the recompiler does not poll in). Monster Hunter Tri's open gaps
-   may be the same.
-3. **The frame rate.** The goal of the port: a rate the Wii never held.
-   The engine runs at 30 (its VI callbacks act on every other retrace when
-   `atnGfx`'s object has `+0xCC` set) and steps its world by a time step
-   (the RE project found `r13-0x7AE0` = dt). First measure where the frame
-   time goes in the heaviest places (Lazulis, big battles) with
-   `WIIKIT_PERF=1` and `WIIKIT_PROFILE`; then see whether the engine can
-   run at 60 with `+0xCC` cleared and its step halved, and what breaks
-   (animation at 30 frames, `.motion`; effects; the camera).
-4. Fog: `gx: fog (not drawn), type 2` — the renderer has no fog yet;
+   `TLS_HITCH=1` while playing: any stall the user feels, with where the
+   threads were. Two frames over 60 ms remain on the way into the cave:
+   the scene being set up (the engine's own work, 8046Cxxx).
+3. Fog: `gx: fog (not drawn), type 2` — the renderer has no fog yet;
    the game uses it (wiikit, layer 5).
-5. The Remote and Nunchuk: the game also plays with them; wiikit has no
-   Nunchuk. Only if the Classic falls short.
+4. The Remote and Nunchuk: the game also plays with them; wiikit has a
+   Nunchuk since `57169a2` (Crystal Bearers). Only if the Classic falls
+   short.
 
 Build and run:
 
@@ -36,4 +34,6 @@ Build and run:
 extraction. `build/fonts` holds the boot ROM's fonts and `dsp_coef.bin`
 (copied from Monster Hunter Tri's build). Unattended: `WIIKIT_PAD="50:A
 54:A ..."` presses the Classic's buttons too; A every 4 s from 50 s reaches
-the first tutorial in about 4 minutes.
+the cave in about a minute, the first tutorial in about four.
+`WIIKIT_AUDIODBG=1` reports each audio block without its frame, with where
+every guest thread was.
