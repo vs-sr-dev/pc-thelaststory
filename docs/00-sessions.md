@@ -91,3 +91,40 @@ Results:
 changes (`d9d14c0`) were checked on the seven other ports (`10-wiikit.md`).
 Then the user played: "decidedly improved", one dip left of all the small
 ones (scene changes still take a frame or two over 60 ms).
+
+## Session 3 — played on, and the first sight of a scene
+
+Goal: an issue on GitHub ("I want to see this going on!") asked for more.
+The user played as far as the game went, with `TLS_HITCH=1` logging.
+
+Results:
+
+* **How far it goes**: from the strap screen through the Reptids' cave to
+  Zael's mark (the Gathering) and the save after Syrenne's arrow, about a
+  quarter of an hour of play, without a fault. The user: "a parte qualche hitch qua e là direi
+  ottimo" (some hitches here and there, otherwise excellent).
+* **The hitches were links.** Stalls of 100 ms to 2.7 s, where the camera
+  turned or a scene came in: the GL programs for what came into view,
+  linked when first drawn, 25-210 ms each on the user's driver. In 16
+  minutes of play: 183 links, and 80 of the 137 frames over 60 ms had
+  one; the two longest were 9 and 28 links in a row. The rest are the
+  game's loads, under 150 ms but for seven. They felt worse than in
+  session 2 for being new ground, and because the fog (wiikit `cbd441b`)
+  made every program new code.
+* **The shader list** (wiikit): each program the game draws with is listed
+  by the GX registers that shape it (`build/shaderlist.txt`), and at the
+  start those the cache lacks are generated again and linked in the
+  background, on the driver's own threads. The port ships its list
+  (`tools/shaderlist.txt`, `--shader-list`): a first run, or a run after
+  a driver update, no longer links where it plays. Boot to the cave, the
+  driver's cache defeated (`WIIKIT_SHADERSALT`): 88 links in play and 15
+  frames over 60 ms (1.2 s, 1.6 s) without the list; with it, 86 of 88
+  linked in the background in 1.4 s, 8 frames over 60 ms, the scene loads
+  a run without links has too.
+* **A freeze at the third frame** once at boot (the main thread in
+  `DVDReadAsync`, taking an IPC interrupt), not seen again in six boots;
+  the old binary did it once in October too. `TLS_HITCH` now reports
+  the threads again every 2 s while a frame stays late, for the next time.
+
+`WIIKIT_PERF=1` now reports each link over 20 ms. wiikit's change was
+checked on the nine other ports (`10-wiikit.md`).

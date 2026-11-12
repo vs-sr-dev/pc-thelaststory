@@ -57,8 +57,15 @@ python -m wiikit.recomp build/extract/sys/main.dol --out build/recomp \
 cmake -S build/recomp -B build/recomp-build -G Ninja -DCMAKE_CXX_COMPILER=clang++ \
     -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE=-O1 -DWIIKIT_EXTRA=$PWD/tools/tls.cmake
 ninja -C build/recomp-build
-cd build/run1 && ../recomp-build/wiiboot ../extract --symbols ../recomp/symbols.tsv
+cd build/run1 && ../recomp-build/wiiboot ../extract --symbols ../recomp/symbols.tsv     --nand ../nand --fonts ../fonts --shader-list ../../tools/shaderlist.txt
 ```
+
+`tools/shaderlist.txt` is the GX state of every program the game has been
+seen to draw with (no data from the disc: register values, one line each).
+The first time a scene comes into view its programs must be compiled, a
+stall of up to a second or two at the first run, and again after a driver
+update; with the list, wiiboot compiles them in the background while the
+game starts. Your own runs add what they see to `build/shaderlist.txt`.
 
 `build/fonts` holds the boot ROM's fonts and `dsp_coef.bin` (Dolphin's
 `Sys/GC` has free ones). The names need only Dolphin's `totaldb.dsy` (in

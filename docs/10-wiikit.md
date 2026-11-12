@@ -50,3 +50,28 @@ before, 4 after. Each port was bumped to it.
 The rest of session 2 is the port's own (`tools/tls.cpp`): the engine's
 frame wait to an empty ring, and the ring's queue woken at every retrace
 (`03-executable.md`).
+
+## What it gave wiikit (session 3: `a60fb59`)
+
+| Change | Layer | Why it is not game knowledge |
+|---|---|---|
+| **the shader list**: each program a game draws with, by the GX registers that shape it (`gx_shader_regs`, masked to the bits the generator reads; the program's key is built from them too), one line each in `EXTRACT_DIR/../shaderlist.txt`, checked to give the same code back before it is written; at the start the programs of that list and of each `--shader-list` that the shader cache lacks are generated again and linked in the background (`GL_KHR_parallel_shader_compile`, sixteen at a time); a draw that needs one first waits only for the rest | 5 | a link is 25-200 ms on a desktop driver, and every scene's first sight stalled for its programs: on a first run, after a driver update, after a change to the generator. The list is the game's (register values), not the driver's or the machine's, so a port can ship it |
+| a link in two halves (`link_start`, `link_finish`); a program that does not link is deleted | 5 | the background's links; the failed one leaked |
+| `WIIKIT_PERF` reports each link over 20 ms, and each wait for a listed one | 5 | which stalls are links |
+| `WIIKIT_SHADERSALT=word`: a comment in every program | 5 | the driver keeps its own cache of what it compiled: without it, a test of a first run links in a millisecond |
+
+Checked on the nine other ports, the runtime alone rebuilt against each
+one's own recompiled code, old against new, the same scripted presses:
+Victorious to its rhythm game's instructions, Dragon Quest Swords to its
+title, Conduit 2, Arc Rise Fantasia, Monster Hunter Tri and Castlevania
+Judgment to their menus, Crystal Bearers to its save menu, Echoes of Time
+to its name entry, Mega Man X: Command Mission to its opening scenes: the
+same screens. Each list's lines gave their programs back (3 to 94 programs
+a port), and a second run with the cache emptied linked them all in the
+background in 0.5 s or less. Crystal Bearers draws new programs at each run
+(79 more after 198 listed, none slow): they differ only in the TEV order
+(BP 0x27-0x29), the texture maps it moves between slots, which the
+generator writes into the code. Each port was bumped to it.
+
+The rest of session 3 is the port's own: its list (`tools/shaderlist.txt`)
+and `TLS_HITCH` reporting a late frame again every 2 s.

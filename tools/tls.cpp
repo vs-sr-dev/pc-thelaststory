@@ -44,13 +44,15 @@ int64_t now_us() {
 }
 void hitch_watch() {
     uint32_t seen = 0;
-    bool told = false;
+    int64_t told = 0;                                  // the frame's age when last told
     for (;;) {
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
         uint32_t n = swaps.load();
-        if (n != seen) { seen = n; told = false; continue; }
-        if (!n || told || now_us() - swap_at.load() < 50000) continue;
-        told = true;
+        if (n != seen) { seen = n; told = 0; continue; }
+        int64_t age = now_us() - swap_at.load();
+        // at 50 ms, and every 2 s after while the game stays stuck
+        if (!n || age < 50000 || (told && age - told < 2000000)) continue;
+        told = age;
         rt_log("hitch: frame %u late (%.3f s)", n, os_tb_now() / 60750000.0);
         os_report_running(14);
     }
